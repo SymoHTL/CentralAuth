@@ -16,8 +16,8 @@ builder.Services.AddDbContextFactory<ModelDbContext>(
         options.UseMySql(
             builder.Configuration.GetConnectionString("DefaultConnection"),
             new MySqlServerVersion(new Version(8, 0, 31)),
-            optionsBuilder => { optionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery); }
-        );
+            optionsBuilder =>
+                optionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
         options.EnableSensitiveDataLogging();
         options.UseLoggerFactory(new NullLoggerFactory());
     },
@@ -99,7 +99,6 @@ var origins = await dbCon.CorsOrigins.AsNoTracking()
     .Select(c => c.Origin).ToArrayAsync();
 
 app.UseCors(policy => policy.WithOrigins(origins)
-    .SetIsOriginAllowed(_ => true)
     .AllowCredentials().AllowAnyHeader().AllowAnyMethod());
 
 // metrics
