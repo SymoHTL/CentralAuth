@@ -19,7 +19,7 @@ public class EmailSender(
             using var smtpClient = SmtpFactory();
             using var mail = MailFactory(email, subject, htmlMessage);
             await smtpClient.SendMailAsync(mail);
-            _logger.LogInformation("Email sent to {Email}, subject: {Subject}", email, subject);
+            _logger.LogInformation("Email sent");
         }
         catch (Exception e) {
             _logger.LogError(e, "Error sending email");

@@ -7,12 +7,6 @@ namespace AuthApi.Extensions;
 
 public static class BuilderExtensions {
     public static IHostApplicationBuilder AddMetrics(this IHostApplicationBuilder builder) {
-        builder.Logging.AddOpenTelemetry(logging => {
-            logging.IncludeFormattedMessage = true;
-            logging.IncludeScopes = true;
-        });
-        
-        
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics => {
                 metrics.AddAspNetCoreInstrumentation()

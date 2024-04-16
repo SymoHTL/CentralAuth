@@ -26,7 +26,9 @@ builder.Services.AddDbContextFactory<ModelDbContext>(
 
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"))
+    .AddOptionsWithValidateOnStart<MailSettings>()
+    .ValidateDataAnnotations();
 
 
 builder.Services.Configure<IdentityOptions>(options => {
@@ -53,8 +55,9 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
 // cookie auth
 builder.Services.ConfigureApplicationCookie(options => {
     options.Cookie.HttpOnly = true;
+#if RELEASE
     options.Cookie.Domain = builder.Configuration["CookieDomain"] ?? throw new Exception("CookieDomain not set");
-#if !RELEASE
+#else
     options.Cookie.Domain = "localhost";
     options.Cookie.SecurePolicy = CookieSecurePolicy.None;
 #endif
@@ -62,6 +65,8 @@ builder.Services.ConfigureApplicationCookie(options => {
 });
 
 builder.Services.AddCors();
+
+builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -88,6 +93,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
 
+
 var dbCon = app.Services.GetRequiredService<ModelDbContext>();
 var origins = await dbCon.CorsOrigins.AsNoTracking()
     .Select(c => c.Origin).ToArrayAsync();
@@ -97,7 +103,6 @@ app.UseCors(policy => policy.WithOrigins(origins)
     .AllowCredentials().AllowAnyHeader().AllowAnyMethod());
 
 // metrics
-
 app.MapMetrics();
 
 // serilog
@@ -109,5 +114,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapIdentityApi<AppUser>();
 
 app.Run();
