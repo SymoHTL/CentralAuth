@@ -1,9 +1,4 @@
-﻿using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Trace;
-
-namespace AuthApi.Extensions;
+﻿namespace AuthApi.Extensions;
 
 public static class BuilderExtensions {
     public static IHostApplicationBuilder AddMetrics(this IHostApplicationBuilder builder) {
@@ -32,17 +27,15 @@ public static class BuilderExtensions {
 
                 tracing.AddAspNetCoreInstrumentation().AddHttpClientInstrumentation();
             });
-        
+
         // health checks
         builder.Services.AddHealthChecks()
             .AddCheck("self", () =>
                 HealthCheckResult.Healthy(), ["live"]);
-        
+
         builder.Services.AddServiceDiscovery();
-        
-        builder.Services.ConfigureHttpClientDefaults(http => {
-            http.AddServiceDiscovery();
-        });
+
+        builder.Services.ConfigureHttpClientDefaults(http => { http.AddServiceDiscovery(); });
 
         return builder;
     }
@@ -51,13 +44,13 @@ public static class BuilderExtensions {
         app.UseForwardedHeaders();
 
         app.UseRouting();
-        
+
         //app.UseWhen(context => context.Request.Path.StartsWithSegments("/metrics"),
         //    appBuilder => { appBuilder.UseMiddleware<PrometheusOnlyMiddleware>(); });
-        
+
         app.UseOpenTelemetryPrometheusScrapingEndpoint();
         app.MapPrometheusScrapingEndpoint();
-        
+
         app.MapHealthChecks("/health");
 
         app.MapHealthChecks("/alive", new HealthCheckOptions {

@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace Model.Entities;
+﻿namespace Model.Entities;
 
 public class AppUser : IdentityUser {
-    
 }

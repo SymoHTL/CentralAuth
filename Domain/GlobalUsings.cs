@@ -1,5 +1,3 @@
-// Global using directives
-
 global using System.Linq.Expressions;
 global using Domain.Extensions;
 global using Microsoft.EntityFrameworkCore;

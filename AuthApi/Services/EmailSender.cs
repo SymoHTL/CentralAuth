@@ -1,6 +1,4 @@
-﻿using ILogger = Microsoft.Extensions.Logging.ILogger;
-
-namespace AuthApi.Services;
+﻿namespace AuthApi.Services;
 
 public class EmailSender(
     IOptions<MailSettings> optionsAccessor,

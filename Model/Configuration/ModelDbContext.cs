@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using Model.Entities;
-
-namespace Model.Configuration;
+﻿namespace Model.Configuration;
 
 public class ModelDbContext(DbContextOptions<ModelDbContext> options) :
     IdentityDbContext<AppUser>(options) {

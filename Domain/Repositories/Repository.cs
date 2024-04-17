@@ -3,11 +3,12 @@
 public class Repository<TEntity> where TEntity : class {
     public readonly ModelDbContext Context;
     public readonly DbSet<TEntity> Table;
+
     public Repository(ModelDbContext context) {
         Context = context;
         Table = Context.Set<TEntity>();
     }
-    
+
     public async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> func, CancellationToken ct,
         bool tracking = false, bool ignoreAutoIncludes = false,
         params (Expression<Func<TEntity, object>>, SortDirection)[] sort) {
@@ -18,8 +19,9 @@ public class Repository<TEntity> where TEntity : class {
             .OrderByMultiple(sort)
             .FirstOrDefaultAsync(func, ct);
     }
-    
-    public async Task<TEntity?> FirstOrDefaultAsync<TKey>(Expression<Func<TEntity, TKey>> keySelector, TKey key, CancellationToken ct,
+
+    public async Task<TEntity?> FirstOrDefaultAsync<TKey>(Expression<Func<TEntity, TKey>> keySelector, TKey key,
+        CancellationToken ct,
         bool tracking = false, bool ignoreAutoIncludes = false) {
         var parameter = Expression.Parameter(typeof(TEntity), "e");
         var body = Expression.Equal(Expression.Invoke(keySelector, parameter), Expression.Constant(key, typeof(TKey)));
@@ -30,8 +32,9 @@ public class Repository<TEntity> where TEntity : class {
         if (!tracking) query = query.AsNoTracking();
         return await query.FirstOrDefaultAsync(lambda, ct);
     }
-    
-    public async Task<List<TEntity>> ReadAsync(Expression<Func<TEntity, bool>> filter, CancellationToken ct, bool tracking = false,
+
+    public async Task<List<TEntity>> ReadAsync(Expression<Func<TEntity, bool>> filter, CancellationToken ct,
+        bool tracking = false,
         params (Expression<Func<TEntity, object>>, SortDirection)[] sort) {
         var query = Table.AsQueryable();
         if (!tracking) query = query.AsNoTracking();
@@ -40,7 +43,7 @@ public class Repository<TEntity> where TEntity : class {
             .Where(filter)
             .ToListAsync(ct);
     }
-    
+
     private static Expression<Func<TEntity, bool>> CreateLikeExpression<TProperty>(
         Expression<Func<TEntity, TProperty>> propertySelector, string search) {
         // Get the body of the original lambda expression
@@ -59,8 +62,8 @@ public class Repository<TEntity> where TEntity : class {
 
         return lambda;
     }
-    
-    
+
+
     public async Task<TEntity> CreateAsync(TEntity entity, CancellationToken ct) {
         Table.Add(entity);
         await Context.SaveChangesAsync(ct);
@@ -101,7 +104,7 @@ public class Repository<TEntity> where TEntity : class {
     public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> filter, CancellationToken ct) {
         return await Table.IgnoreAutoIncludes().AnyAsync(filter, ct);
     }
-    
+
     protected IQueryable<TEntity> SearchFor<TProperty>(Expression<Func<TEntity, TProperty>> propertySelector,
         string? search) {
         ArgumentNullException.ThrowIfNull(propertySelector);
