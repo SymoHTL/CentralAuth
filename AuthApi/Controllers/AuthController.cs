@@ -1,11 +1,15 @@
-﻿namespace AuthApi.Controllers;
+﻿using LoginRequest = Shared.Requests.LoginRequest;
+using RefreshRequest = Shared.Requests.RefreshRequest;
+using RegisterRequest = Shared.Requests.RegisterRequest;
+using ResetPasswordRequest = Shared.Requests.ResetPasswordRequest;
+
+namespace AuthApi.Controllers;
 
 [ApiController]
 [Route("auth")]
 public class AuthController(
     UserManager<AppUser> userManager,
     IUserStore<AppUser> userStore,
-    IUserEmailStore<AppUser> emailStore,
     IEmailSender<AppUser> emailSender,
     SignInManager<AppUser> signInManager,
     IOptionsMonitor<BearerTokenOptions> bearerTokenOptions,
@@ -18,9 +22,10 @@ public class AuthController(
             throw new NotSupportedException($"{nameof(AuthController)} requires a user store with email support.");
         registration.Sanitize();
 
-        var user = new AppUser();
-        await userStore.SetUserNameAsync(user, registration.Username, ct);
-        await emailStore.SetEmailAsync(user, registration.Email, ct);
+        var user = new AppUser {
+            UserName = registration.Username,
+            Email = registration.Email
+        };
         var result = await UserManager.CreateAsync(user, registration.Password);
 
         if (!result.Succeeded)

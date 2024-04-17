@@ -10,7 +10,6 @@ builder.Services.AddDataProtection()
 
 builder.Services.AddAuthorizationBuilder();
 
-
 builder.Services.AddDbContextFactory<ModelDbContext>(
     options => {
         options.UseMySql(
@@ -30,6 +29,23 @@ builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailS
     .AddOptionsWithValidateOnStart<MailSettings>()
     .ValidateDataAnnotations();
 
+//builder.Services.AddAuthentication(options => {
+//        options.DefaultAuthenticateScheme = IdentityConstants.BearerScheme;
+//        options.DefaultChallengeScheme = IdentityConstants.BearerScheme;
+//    })
+//    .AddBearerToken(IdentityConstants.BearerScheme, options => {
+//        options.BearerTokenExpiration = TimeSpan.FromDays(5);
+//        options.RefreshTokenExpiration = TimeSpan.FromDays(30);
+//        options.Validate();
+//    });
+
+builder.Services.AddAuthorizationBuilder()
+    .SetDefaultPolicy(new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .AddAuthenticationSchemes(IdentityConstants.ApplicationScheme/*,
+            IdentityConstants.BearerScheme*/)
+        .Build());
+
 
 builder.Services.Configure<IdentityOptions>(options => {
     // Default Lockout settings.
@@ -48,10 +64,6 @@ builder.Services.Configure<IdentityOptions>(options => {
     options.Password.RequiredUniqueChars = 1;
 });
 
-builder.Services.AddIdentity<AppUser, IdentityRole>()
-    .AddEntityFrameworkStores<ModelDbContext>()
-    .AddApiEndpoints();
-
 // cookie auth
 builder.Services.ConfigureApplicationCookie(options => {
     options.Cookie.HttpOnly = true;
@@ -62,14 +74,22 @@ builder.Services.ConfigureApplicationCookie(options => {
     options.Cookie.SecurePolicy = CookieSecurePolicy.None;
 #endif
     options.Cookie.SameSite = SameSiteMode.Strict;
+    options.LoginPath = "/auth/login";
+    options.LogoutPath = "/auth/logout";
 });
+
+
+builder.Services.AddIdentity<AppUser, IdentityRole>()
+    .AddEntityFrameworkStores<ModelDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddCors();
 
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c => { c.CustomSchemaIds(type => type.FullName); });
+
 
 // metrics
 
@@ -113,7 +133,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.MapIdentityApi<AppUser>();
 
 app.Run();

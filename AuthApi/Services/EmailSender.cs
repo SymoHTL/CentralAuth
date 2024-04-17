@@ -9,7 +9,6 @@ public class EmailSender(
 
     private readonly string _from = optionsAccessor.Value.From;
     private readonly string _host = optionsAccessor.Value.Host;
-    private readonly ILogger _logger = logger;
     private readonly int _port = optionsAccessor.Value.Port;
 
     public async Task SendEmailAsync(string email, string subject, string htmlMessage) {
@@ -17,10 +16,10 @@ public class EmailSender(
             using var smtpClient = SmtpFactory();
             using var mail = MailFactory(email, subject, htmlMessage);
             await smtpClient.SendMailAsync(mail);
-            _logger.LogInformation("Email sent");
+            logger.LogInformation("Email sent");
         }
         catch (Exception e) {
-            _logger.LogError(e, "Error sending email");
+            logger.LogError(e, "Error sending email");
         }
     }
 

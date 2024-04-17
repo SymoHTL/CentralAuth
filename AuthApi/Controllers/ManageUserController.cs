@@ -1,4 +1,7 @@
-﻿namespace AuthApi.Controllers;
+﻿using InfoRequest = Shared.Requests.InfoRequest;
+using TwoFactorRequest = Shared.Requests.TwoFactorRequest;
+
+namespace AuthApi.Controllers;
 
 [Authorize]
 [ApiController]
@@ -9,10 +12,9 @@ public class ManageUserController(
     LinkGenerator linkGenerator,
     IEmailSender<AppUser> emailSender) : IdentityController(userManager, linkGenerator, emailSender) {
     [HttpPost("manage/2fa")]
-    public async Task<IActionResult> CHange2FA([FromBody] TwoFactorRequest request,
-        ClaimsPrincipal claimsPrincipal) {
+    public async Task<IActionResult> Change2FA([FromBody] TwoFactorRequest request) {
         request.Sanitize();
-        if (await UserManager.GetUserAsync(claimsPrincipal) is not { } user)
+        if (await UserManager.GetUserAsync(HttpContext.User) is not { } user)
             return NotFound();
 
         if (request.Enable == true) {
